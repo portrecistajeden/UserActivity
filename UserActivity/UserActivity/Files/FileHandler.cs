@@ -29,7 +29,8 @@ namespace UserActivity.Logic
         {
             var allLines = File.ReadLines(path);
 
-            var result = allLines.Where(x => !x.Contains("AUTH_FAILED")).ToList();
+            var result = allLines.Where(x => x.Contains("Connect") || x.Contains("Disconnect")).ToList();
+            
             return result;
         }
     }

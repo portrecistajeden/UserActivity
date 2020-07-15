@@ -5,21 +5,29 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:UserActivity.Views"
         mc:Ignorable="d"
-        Title="Users Activity" Height="450" Width="800">
-    <Grid Width="750" Height="400">
-        <DataGrid ItemsSource="{Binding Path=gridView}" CanUserAddRows="false" AutoGenerateColumns="false" IsReadOnly="true" Margin="0,0,0,80">
+        Title="Users Activity" Height="500" Width="800" MinWidth="500" MinHeight="400">
+    <Grid  Margin="0,0,0,9.8" Width="Auto" Height="Auto">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="73*"/>
+            <RowDefinition Height="7*"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="50*"/>
+            <ColumnDefinition Width="50*"/>
+        </Grid.ColumnDefinitions>
+        <DataGrid ItemsSource="{Binding gridView}" CanUserAddRows="false" AutoGenerateColumns="false" IsReadOnly="true" Grid.ColumnSpan="2" Margin="5,5,5,0" Width="Auto" HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Data" Binding="{Binding date}"/>
-                <DataGridTextColumn Header="Login" Binding="{Binding Path = login}"/>
-                <DataGridTextColumn Header="Czy zalogowany w danym dniu (TAK/NIE)" Binding="{Binding Path = wasLoggedThatDay}" CanUserSort="false"/>
-                <DataGridTextColumn Header="Łączny czas aktywności w danym dniu" Binding="{Binding Path = activityTime}" CanUserSort="false" Width="*"/>
+                <DataGridTextColumn Header="L.p." Binding="{Binding Path = lp}" MinWidth="50"/>
+                <DataGridTextColumn Header="Data" Binding="{Binding Path = date}" MinWidth="100"/>
+                <DataGridTextColumn Header="Login" Binding="{Binding Path = login}" MinWidth="150"/>
+                <DataGridTextColumn Header="Czy zalogowany w danym dniu (TAK/NIE)" Binding="{Binding Path = wasLoggedThatDay}" CanUserSort="false" MinWidth="50"/>
+                <DataGridTextColumn Header="Łączny czas aktywności w danym dniu" Binding="{Binding Path = activityTime}" CanUserSort="false" Width="*" MinWidth="150"/>
             </DataGrid.Columns>
 
         </DataGrid>
-
-        <TextBox Height="20" Margin="0,340,142,30" BorderBrush="Black" IsReadOnly="true"/>
-        <Button x:Name ="LoadButtonClick" Content="Wczytaj plik" HorizontalAlignment="Left" Margin="641,346,0,0" VerticalAlignment="Top" Width="99"/>
+        <Button x:Name ="LoadButtonClick" Content="Wczytaj plik" HorizontalAlignment="Center" VerticalAlignment="center" Width="133" Grid.Row="1" Grid.Column="0"/>
+        <Button x:Name ="SaveButtonClick" Content="Zapisz w xlsx" HorizontalAlignment="Center" VerticalAlignment="Center" Width="133" Grid.Row="1" Grid.Column="1" />
 
     </Grid>
-    
+
 </Window>

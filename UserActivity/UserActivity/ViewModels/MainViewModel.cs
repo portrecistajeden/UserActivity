@@ -2,9 +2,11 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Controls;
 using UserActivity.Logic;
 using UserActivity.Models;
 
@@ -14,19 +16,21 @@ namespace UserActivity.ViewModels
     {
         public ObservableCollection<RowModel> gridView { get; set; }
 
-        FileHandler fileHandler;
-        DataAccess db;
-        int _year = 2020;
+        private FileHandler fileHandler;
+        private DataAccess db;
+        private int _year = 2020;
+        private string path;
         public MainViewModel()
         {
             fileHandler = new FileHandler();
             db = new DataAccess();
             gridView = new ObservableCollection<RowModel>();
         }
+        
         public void LoadButtonClick()
         {
-            string path = fileHandler.getLogFilePath();
-            if(path != "canceled")
+            path = fileHandler.getLogFilePath();
+            if (path != "canceled")
             {
                 gridView.Clear();
                 List<string> rows = fileHandler.readLogFile(path);
@@ -61,13 +65,18 @@ namespace UserActivity.ViewModels
         }
         
         private List<RowModel> DoEverything(List<string[]> data)
-        {           
+        {
+            int lp=1;
             string[] firstRow = data[0];
             string[] time = firstRow[2].Split(':');
             DateTime date = new DateTime(_year, convertMonth(firstRow[0]), Int32.Parse(firstRow[1]), Int32.Parse(time[0]), Int32.Parse(time[1]), Int32.Parse(time[2]));
 
             List<RowModel> result = new List<RowModel>();
             List<string[]> ignore = new List<string[]>();
+            List<string> users = new List<string>();
+            List<DateTime> days = new List<DateTime>();
+            List<RowModel> final = new List<RowModel>();
+
             TimeSpan interval;
             DateTime date1, date2;
 
@@ -78,6 +87,11 @@ namespace UserActivity.ViewModels
                 time = new string[3];
                 time = row[2].Split(':');
                 date1 = new DateTime(_year, convertMonth(row[0]), Int32.Parse(row[1]), Int32.Parse(time[0]), Int32.Parse(time[1]), Int32.Parse(time[2]));
+
+                if (!users.Contains(row[4]))
+                    users.Add(row[4]);
+                
+
                 foreach(string[] row2 in data.Where(x => x[3].Equals("Disconnect") && x[1]==row[1] && !ignore.Contains(x)))
                 {
                     if(row[4].Equals(row2[4]))
@@ -100,16 +114,48 @@ namespace UserActivity.ViewModels
                             result[index] = model;
                         }
                         else
-                            result.Add(new RowModel(new DateTime(_year, date2.Month, date2.Day), row2[4], true, interval));
-
+                        {
+                            result.Add(new RowModel(0, new DateTime(_year, date2.Month, date2.Day), row2[4], true, interval));                            
+                        }
+                        
                         ignore.Add(row);
                         ignore.Add(row2);
                         break;
                     }
                 }
             }
+
+            foreach(string[] row in data)
+            {
+                date1 = new DateTime(_year, convertMonth(row[0]), Int32.Parse(row[1]));
+                if (!days.Contains(date1))
+                {
+                    days.Add(new DateTime(date1.Year, date1.Month, date1.Day));
+                }
+            }
+
+            foreach(DateTime d in days)
+            {
+                foreach(string user in users)
+                {
+                    final.Add(new RowModel(lp, d, user, false, new TimeSpan(0)));
+                    lp++;
+                    //Console.WriteLine(d.ToString(), user, false, new TimeSpan(0));
+                }
+            }
+
+            RowModel matchPerson;
+            foreach(RowModel row in final)
+            {
+                matchPerson = result.Where(x => x.date == row.date && x.login == row.login).FirstOrDefault();
+                if (matchPerson != null)
+                {
+                    row.wasLoggedThatDay = true;
+                    row.activityTime = matchPerson.activityTime;
+                }
+            }
             
-            return result;
+            return final;
         }
         private int convertMonth(string month)
         {
