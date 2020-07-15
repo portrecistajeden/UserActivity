@@ -1,6 +1,7 @@
 ﻿using Caliburn.Micro;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,7 +12,7 @@ namespace UserActivity.ViewModels
 {
     public class MainViewModel
     {
-        public BindableCollection<RowModel> dataGrid { get; set; }
+        public ObservableCollection<RowModel> gridView { get; set; }
         FileHandler fileHandler;
         DataAccess db;
         int _year = 2020;
@@ -19,16 +20,9 @@ namespace UserActivity.ViewModels
         {
             fileHandler = new FileHandler();
             db = new DataAccess();
-            //List<RowModel> list = new List<RowModel>();
-            //RowModel row = new RowModel(new DateTime(2020, 2, 21), "iksde", true, "12h");
-            //list.Add(row);
-            //row = new RowModel(new DateTime(1998, 2, 21), "pedro", false, "0H");
-            //list.Add(row);
-            //db.setDb(list);
-
-            dataGrid = new BindableCollection<RowModel>(db.GetDb());
+            //SetDb();
+            gridView = new ObservableCollection<RowModel>();
         }
-
         public void SetDb()
         {
             string path = fileHandler.getLogFilePath();
@@ -37,6 +31,7 @@ namespace UserActivity.ViewModels
                 List<string> rows = fileHandler.readLogFile(path);
                 List<string[]> parsedData = ParseData(rows);
                 db.SetDb(DoEverything(parsedData));
+                gridView = new ObservableCollection<RowModel>(db.GetDb());
             }
         }
 
@@ -93,7 +88,7 @@ namespace UserActivity.ViewModels
                             && x.date.Month == date2.Month)
                             .FirstOrDefault();
 
-                        //Console.WriteLine(date1 + " " + row2[4] + " " + interval);
+                        Console.WriteLine(date1 + " " + row2[4] + " " + interval);
                         if(model != null)
                         {
                             model.activityTime += interval;
@@ -105,11 +100,15 @@ namespace UserActivity.ViewModels
 
                         ignore.Add(row);
                         ignore.Add(row2);
+                        break;
                     }
                 }
             }
+            foreach(RowModel r in result)
+            {
+                Console.WriteLine(r.date.ToString() + " " + r.activityTime.ToString() + " " + r.login + " "+ r.wasLoggedThatDay);
+            }
             return result;
-
         }
         private int convertMonth(string month)
         {

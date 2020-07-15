@@ -7,9 +7,9 @@
         mc:Ignorable="d"
         Title="Users Activity" Height="450" Width="800">
     <Grid Width="750" Height="400">
-        <DataGrid x:Name="dataGrid" CanUserAddRows="false" AutoGenerateColumns="false" IsReadOnly="true" Margin="0,0,0,80">
+        <DataGrid x:Name="dataGrid" ItemsSource="{Binding gridView}" CanUserAddRows="false" AutoGenerateColumns="false" IsReadOnly="true" Margin="0,0,0,80">
             <DataGrid.Columns>
-                <DataGridTextColumn Header="Data" Binding="{Binding Path = date}"/>
+                <DataGridTextColumn Header="Data" Binding="{Binding date}"/>
                 <DataGridTextColumn Header="Login" Binding="{Binding Path = login}"/>
                 <DataGridTextColumn Header="Czy zalogowany w danym dniu (TAK/NIE)" Binding="{Binding Path = wasLoggedThatDay}" CanUserSort="false"/>
                 <DataGridTextColumn Header="Łączny czas aktywności w danym dniu" Binding="{Binding Path = activityTime}" CanUserSort="false" Width="*"/>
