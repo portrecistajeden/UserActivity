@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Users Activity" Height="450" Width="800">
     <Grid Width="750" Height="400">
-        <DataGrid x:Name="dataGrid" ItemsSource="{Binding gridView}" CanUserAddRows="false" AutoGenerateColumns="false" IsReadOnly="true" Margin="0,0,0,80">
+        <DataGrid ItemsSource="{Binding Path=gridView}" CanUserAddRows="false" AutoGenerateColumns="false" IsReadOnly="true" Margin="0,0,0,80">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="Data" Binding="{Binding date}"/>
                 <DataGridTextColumn Header="Login" Binding="{Binding Path = login}"/>
@@ -18,7 +18,7 @@
         </DataGrid>
 
         <TextBox Height="20" Margin="0,340,142,30" BorderBrush="Black" IsReadOnly="true"/>
-        <Button x:Name ="SetDb" Content="Wczytaj plik" HorizontalAlignment="Left" Margin="641,346,0,0" VerticalAlignment="Top" Width="99"/>
+        <Button x:Name ="LoadButtonClick" Content="Wczytaj plik" HorizontalAlignment="Left" Margin="641,346,0,0" VerticalAlignment="Top" Width="99"/>
 
     </Grid>
     

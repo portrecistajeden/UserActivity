@@ -13,6 +13,7 @@ namespace UserActivity.ViewModels
     public class MainViewModel
     {
         public ObservableCollection<RowModel> gridView { get; set; }
+
         FileHandler fileHandler;
         DataAccess db;
         int _year = 2020;
@@ -20,18 +21,21 @@ namespace UserActivity.ViewModels
         {
             fileHandler = new FileHandler();
             db = new DataAccess();
-            //SetDb();
             gridView = new ObservableCollection<RowModel>();
         }
-        public void SetDb()
+        public void LoadButtonClick()
         {
             string path = fileHandler.getLogFilePath();
             if(path != "canceled")
             {
+                gridView.Clear();
                 List<string> rows = fileHandler.readLogFile(path);
                 List<string[]> parsedData = ParseData(rows);
                 db.SetDb(DoEverything(parsedData));
-                gridView = new ObservableCollection<RowModel>(db.GetDb());
+                foreach(RowModel r in db.GetDb())
+                {
+                    gridView.Add(r);
+                }
             }
         }
 
@@ -88,7 +92,7 @@ namespace UserActivity.ViewModels
                             && x.date.Month == date2.Month)
                             .FirstOrDefault();
 
-                        Console.WriteLine(date1 + " " + row2[4] + " " + interval);
+                        //Console.WriteLine(date1 + " " + row2[4] + " " + interval);
                         if(model != null)
                         {
                             model.activityTime += interval;
@@ -104,10 +108,7 @@ namespace UserActivity.ViewModels
                     }
                 }
             }
-            foreach(RowModel r in result)
-            {
-                Console.WriteLine(r.date.ToString() + " " + r.activityTime.ToString() + " " + r.login + " "+ r.wasLoggedThatDay);
-            }
+            
             return result;
         }
         private int convertMonth(string month)
