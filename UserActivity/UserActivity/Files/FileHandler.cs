@@ -10,7 +10,7 @@ namespace UserActivity.Files
 {
     public class FileHandler
     {
-        public string getLogFilePath()
+        public string GetLogFilePath()
         {
             Microsoft.Win32.OpenFileDialog dlg = new Microsoft.Win32.OpenFileDialog();
             dlg.FileName = "";
@@ -26,7 +26,7 @@ namespace UserActivity.Files
             return "canceled";
         }
 
-        public List<string> readLogFile(string path)
+        public List<string> ReadLogFile(string path)
         {
             var allLines = File.ReadLines(path);
 

@@ -27,9 +27,9 @@ namespace UserActivity
     {
         public ObservableCollection<RowModel> gridView { get; set; }
 
-        private FileHandler fileHandler;
-        private DataAccess db;
-        private int _year = 2020;
+        private readonly FileHandler fileHandler;
+        private readonly DataAccess db;
+        private readonly int _year = 2020;
         private string path;
         private Boolean DB_EMPTY = true;
         private Boolean FILE_LOADED = false;
@@ -40,23 +40,26 @@ namespace UserActivity
             db = new DataAccess();
             gridView = new ObservableCollection<RowModel>();
         }
+
+        //Wywołanie funkcji pracującej na danych po naciśnięciu guzika 'Wykonaj'
         private void ExecuteButtonClick(object sender, RoutedEventArgs s)
         {
             if (path != "canceled" && path != "")
             {
                 gridView.Clear();
-                List<string> rows = fileHandler.readLogFile(path);
+                List<string> rows = fileHandler.ReadLogFile(path); 
+                if (!rows.Any())
+                    return;
                 List<string[]> parsedData = ParseData(rows);
-                db.SetDb(DoEverything(parsedData));
-                //foreach (RowModel r in db.GetDb())
-                //{
-                //    gridView.Add(r);
-                //}
+                
+                db.SetDb(OperationOnData(parsedData));
                 this.dataGrid.ItemsSource = db.GetDb();
                 DB_EMPTY = false;
                 ButtonsEnable();
             }
         }
+
+        //Wyczyszczenie tabeli z danymi
         private void ClearButtonClick (object sender, RoutedEventArgs s)
         {
             db.ClearDb();
@@ -69,10 +72,12 @@ namespace UserActivity
             FILE_LOADED = false;
             ButtonsEnable();
         }
+
+        //Wczytanie pliku .log
         private void LoadButtonClick(object sender, RoutedEventArgs e)
         {
             string localFilePath;
-            localFilePath = fileHandler.getLogFilePath();
+            localFilePath = fileHandler.GetLogFilePath();
             if (path != "" && localFilePath == "canceled")
                 return;
             path = localFilePath;
@@ -84,6 +89,7 @@ namespace UserActivity
             ButtonsEnable();
         }
 
+        //Zapisanie tabeli do pliku xlsx
         public void SaveButtonClick(object sender, RoutedEventArgs e)
         {
             XLWorkbook workbook = new XLWorkbook();
@@ -93,6 +99,7 @@ namespace UserActivity
             fileHandler.SaveXlsxFile(workbook);
         }
 
+        //Przygotowanie DataTable do zapisania tabeli w pliku xlsx
         public DataTable MakeDataTable()
         {
             DataTable table = new DataTable();
@@ -149,6 +156,8 @@ namespace UserActivity
             return table;
         }
 
+        //Wyciąganie z linii tekstu z pliku log najważniejszych informacji potrzebnych do operacji i zapisywanie ich w formie Listy tablic string
+        //wyrzucenie komunikatów o nieudanym logowaniu
         private List<string[]> ParseData(List<string> strings)
         {
             string[] parsedString;
@@ -170,6 +179,7 @@ namespace UserActivity
             return result;
         }
 
+        //Blokowanie i odblokowywanie guzików zależnie od tego czy wczytany jest plik i czy wyświetlony został wynik
         private void ButtonsEnable()
         {
             Button executeButton = this.FindName("ExecuteButton") as Button;
@@ -191,18 +201,19 @@ namespace UserActivity
             }
         }
 
-        private List<RowModel> DoEverything(List<string[]> data)
+        //Praca na przygotowanych danych
+        private List<RowModel> OperationOnData(List<string[]> data)
         {
             int lp = 1;
             string[] firstRow = data[0];
             string[] time = firstRow[2].Split(':');
-            DateTime date = new DateTime(_year, convertMonth(firstRow[0]), Int32.Parse(firstRow[1]), Int32.Parse(time[0]), Int32.Parse(time[1]), Int32.Parse(time[2]));
+            DateTime date = new DateTime(_year, ConvertMonth(firstRow[0]), Int32.Parse(firstRow[1]), Int32.Parse(time[0]), Int32.Parse(time[1]), Int32.Parse(time[2]));
 
-            List<RowModel> result = new List<RowModel>();
-            List<string[]> ignore = new List<string[]>();
-            List<string> users = new List<string>();
-            List<DateTime> days = new List<DateTime>();
-            List<RowModel> final = new List<RowModel>();
+            List<RowModel> result = new List<RowModel>();   //Lista wszytskich użytowników którzy spędzali czas na stronie
+            List<string[]> ignore = new List<string[]>();   //Lista osób do wykluczenia podczas operacji w celu uniknięcia powtórzeń
+            List<string> users = new List<string>();        //Lista wszystkich użytkowników występujących w pliku .log
+            List<DateTime> days = new List<DateTime>();     //Lista wszystkich dni z pliku .log
+            List<RowModel> final = new List<RowModel>();    //Finalna lista z gotowymi statystykami
 
             TimeSpan interval;
             DateTime date1, date2;
@@ -213,7 +224,7 @@ namespace UserActivity
             {
                 time = new string[3];
                 time = row[2].Split(':');
-                date1 = new DateTime(_year, convertMonth(row[0]), Int32.Parse(row[1]), Int32.Parse(time[0]), Int32.Parse(time[1]), Int32.Parse(time[2]));
+                date1 = new DateTime(_year, ConvertMonth(row[0]), Int32.Parse(row[1]), Int32.Parse(time[0]), Int32.Parse(time[1]), Int32.Parse(time[2]));
 
                 if (!users.Contains(row[4]))
                     users.Add(row[4]);
@@ -225,7 +236,7 @@ namespace UserActivity
                     {
                         time = new string[3];
                         time = row2[2].Split(':');
-                        date2 = new DateTime(_year, convertMonth(row2[0]), Int32.Parse(row2[1]), Int32.Parse(time[0]), Int32.Parse(time[1]), Int32.Parse(time[2]));
+                        date2 = new DateTime(_year, ConvertMonth(row2[0]), Int32.Parse(row2[1]), Int32.Parse(time[0]), Int32.Parse(time[1]), Int32.Parse(time[2]));
                         interval = date2 - date1;
 
                         model = result.Where(x => x.login.Equals(row2[4])
@@ -233,7 +244,6 @@ namespace UserActivity
                             && x.date.Month == date2.Month)
                             .FirstOrDefault();
 
-                        //Console.WriteLine(date1 + " " + row2[4] + " " + interval);
                         if (model != null)
                         {
                             model.activityTime += interval;
@@ -251,26 +261,25 @@ namespace UserActivity
                     }
                 }
             }
-
+            //pozyskiwanie listy ze wszystkimi dniami z pliku .log
             foreach (string[] row in data)
             {
-                date1 = new DateTime(_year, convertMonth(row[0]), Int32.Parse(row[1]));
+                date1 = new DateTime(_year, ConvertMonth(row[0]), Int32.Parse(row[1]));
                 if (!days.Contains(date1))
                 {
                     days.Add(new DateTime(date1.Year, date1.Month, date1.Day));
                 }
             }
-
+            //Tworzenie finalnej listy (dni x użytkownicy); na tym etapie nikt nie odwiedzał strony i spędzał tam 0 sekund
             foreach (DateTime d in days)
             {
                 foreach (string user in users)
                 {
                     final.Add(new RowModel(lp, d, user, "NIE", new TimeSpan(0)));
                     lp++;
-                    //Console.WriteLine(d.ToString(), user, false, new TimeSpan(0));
                 }
             }
-
+            //przyisanie odpowiedniej ilości spędzonego czasu i zmiana wartości pola wasLoggedThatDay na 'TAK'
             RowModel matchPerson;
             foreach (RowModel row in final)
             {
@@ -284,7 +293,8 @@ namespace UserActivity
 
             return final;
         }
-        private int convertMonth(string month)
+        //Dekodowanie miesięcy przy parsowaniu pliku .log
+        private int ConvertMonth(string month)
         {
             switch (month)
             {

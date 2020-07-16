@@ -82,3 +82,5 @@ Apr 16 20:11:36 VPN ovpn-pendrive.services[35704]: Connect user: a76598wa (remot
 Apr 16 20:28:08 VPN ovpn-pendrive.services[38691]: Disconnect user: a76598wa (remote: 80.200.200.80 virt_IP: 10.9.9.15)
 Apr 16 20:28:08 VPN ovpn-pendrive.services[38693]: Connect user: a76598wa (remote: 80.200.200.80 virt_IP: 10.9.9.15)
 Apr 16 20:38:01 VPN ovpn-pendrive.services[40472]: Disconnect user: a76598wa (remote: 80.200.200.80 virt_IP: 10.9.9.15)
+Jul 1 20:28:08 VPN ovpn-pendrive.services[38693]: Connect user: AAAAAAA (remote: 80.200.200.80 virt_IP: 10.9.9.15)
+Jul 1 20:38:01 VPN ovpn-pendrive.services[40472]: Disconnect user: AAAAAAA (remote: 80.200.200.80 virt_IP: 10.9.9.15)
