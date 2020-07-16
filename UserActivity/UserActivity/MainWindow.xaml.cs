@@ -25,8 +25,6 @@ namespace UserActivity
     /// </summary>
     public partial class MainWindow : Window
     {
-        public ObservableCollection<RowModel> gridView { get; set; }
-
         private readonly FileHandler fileHandler;
         private readonly DataAccess db;
         private readonly int _year = 2020;
@@ -38,7 +36,6 @@ namespace UserActivity
             InitializeComponent();
             fileHandler = new FileHandler();
             db = new DataAccess();
-            gridView = new ObservableCollection<RowModel>();
         }
 
         //Wywołanie funkcji pracującej na danych po naciśnięciu guzika 'Wykonaj'
@@ -46,7 +43,6 @@ namespace UserActivity
         {
             if (path != "canceled" && path != "")
             {
-                gridView.Clear();
                 List<string> rows = fileHandler.ReadLogFile(path); 
                 if (!rows.Any())
                     return;

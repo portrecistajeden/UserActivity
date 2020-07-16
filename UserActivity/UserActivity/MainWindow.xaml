@@ -16,7 +16,7 @@
             <ColumnDefinition Width="50*"/>
             <ColumnDefinition Width="50*"/>
         </Grid.ColumnDefinitions>
-        <DataGrid Name="dataGrid" ItemsSource="{Binding gridView}" CanUserAddRows="false" AutoGenerateColumns="false" IsReadOnly="true" Grid.ColumnSpan="2" Margin="5,5,5,0" Width="Auto" HorizontalScrollBarVisibility="Auto">
+        <DataGrid Name="dataGrid" ItemsSource="{Binding}" CanUserAddRows="false" AutoGenerateColumns="false" IsReadOnly="true" Grid.ColumnSpan="2" Margin="5,5,5,0" Width="Auto" HorizontalScrollBarVisibility="Auto">
             <DataGrid.Columns>
                 <DataGridTextColumn Header="L.p." Binding="{Binding Path = lp}" MinWidth="50"/>
                 <DataGridTextColumn Header="Data" Binding="{Binding Path = date}" MinWidth="100"/>
