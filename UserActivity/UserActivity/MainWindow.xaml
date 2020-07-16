@@ -43,9 +43,9 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
-            <Button Click ="ExecuteButtonClick" Content="Wykonaj" Width="133" Grid.Column="0" />
-            <Button Click ="ClearButtonClick" Content="Wyczyść" Width="133" Grid.Column="1" />
-            <Button Click ="SaveButtonClick" Content="Zapisz w xlsx" Width="133" Grid.Column="2" />
+            <Button Name="ExecuteButton" Click ="ExecuteButtonClick" Content="Wykonaj" Width="133" Grid.Column="0" IsEnabled="False"/>
+            <Button Name="ClearButton" Click ="ClearButtonClick" Content="Wyczyść" Width="133" Grid.Column="1" IsEnabled="False"/>
+            <Button Name="SaveButton" Click ="SaveButtonClick" Content="Zapisz w xlsx" Width="133" Grid.Column="2" IsEnabled="False"/>
         </Grid>
 
     </Grid>

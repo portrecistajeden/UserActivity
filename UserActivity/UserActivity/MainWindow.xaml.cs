@@ -1,6 +1,8 @@
-﻿using System;
+﻿using ClosedXML.Excel;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,6 +31,8 @@ namespace UserActivity
         private DataAccess db;
         private int _year = 2020;
         private string path;
+        private Boolean DB_EMPTY = true;
+        private Boolean FILE_LOADED = false;
         public MainWindow()
         {
             InitializeComponent();
@@ -49,6 +53,8 @@ namespace UserActivity
                 //    gridView.Add(r);
                 //}
                 this.dataGrid.ItemsSource = db.GetDb();
+                DB_EMPTY = false;
+                ButtonsEnable();
             }
         }
         private void ClearButtonClick (object sender, RoutedEventArgs s)
@@ -58,6 +64,10 @@ namespace UserActivity
             path = "";
             TextBox pathDisplay = this.FindName("pathDisplay") as TextBox;
             pathDisplay.Text = path;
+
+            DB_EMPTY = true;
+            FILE_LOADED = false;
+            ButtonsEnable();
         }
         private void LoadButtonClick(object sender, RoutedEventArgs e)
         {
@@ -68,11 +78,75 @@ namespace UserActivity
             path = localFilePath;
             
             TextBox pathDisplay = this.FindName("pathDisplay") as TextBox;
-            pathDisplay.Text = path;            
+            pathDisplay.Text = path;
+
+            FILE_LOADED = true;
+            ButtonsEnable();
         }
+
         public void SaveButtonClick(object sender, RoutedEventArgs e)
         {
+            XLWorkbook workbook = new XLWorkbook();
+            DataTable dataTable = MakeDataTable();
+            var ws = workbook.Worksheets.Add(dataTable, "User Activity");
+            ws.Columns().AdjustToContents();
+            fileHandler.SaveXlsxFile(workbook);
+        }
 
+        public DataTable MakeDataTable()
+        {
+            DataTable table = new DataTable();
+            DataColumn column;
+            DataRow dataRow;
+            //L.p.
+            column = new DataColumn
+            {
+                DataType = System.Type.GetType("System.Int32"),
+                ColumnName = "L.p."
+            };
+            //column.Unique = true;
+            table.Columns.Add(column);
+            //Data
+            column = new DataColumn
+            {
+                DataType = System.Type.GetType("System.DateTime"),
+                ColumnName = "Data"
+            };
+            table.Columns.Add(column);
+            //Login
+            column = new DataColumn
+            {
+                DataType = System.Type.GetType("System.String"),
+                ColumnName = "Login"
+            };
+            table.Columns.Add(column);
+            //Czy zalogowany w danym dniu (TAK/NIE)
+            column = new DataColumn
+            {
+                DataType = System.Type.GetType("System.String"),
+                ColumnName = "Czy zalogowany w danym dniu (TAK/NIE)"
+            };
+            table.Columns.Add(column);
+            //Łączny czas aktywności w danym dniu
+            column = new DataColumn
+            {
+                DataType = System.Type.GetType("System.String"),
+                ColumnName = "Łączny czas aktywności w danym dniu"
+            };
+            table.Columns.Add(column);
+
+            foreach(RowModel row in db.GetDb())
+            {
+                dataRow = table.NewRow();
+                dataRow["L.p."] = row.lp;
+                dataRow["Data"] = row.date;
+                dataRow["Login"] = row.login;
+                dataRow["Czy zalogowany w danym dniu (TAK/NIE)"] = row.wasLoggedThatDay;
+                dataRow["Łączny czas aktywności w danym dniu"] = row.activityTime.ToString();
+                table.Rows.Add(dataRow);
+            }
+
+            return table;
         }
 
         private List<string[]> ParseData(List<string> strings)
@@ -94,6 +168,27 @@ namespace UserActivity
                 result.Add(row);
             }
             return result;
+        }
+
+        private void ButtonsEnable()
+        {
+            Button executeButton = this.FindName("ExecuteButton") as Button;
+            Button clearButton = this.FindName("ClearButton") as Button;
+            Button saveButton = this.FindName("SaveButton") as Button;
+            if (FILE_LOADED)
+                executeButton.IsEnabled = true;
+            else
+                executeButton.IsEnabled = false;
+            if (!DB_EMPTY)
+            {
+                clearButton.IsEnabled = true;
+                saveButton.IsEnabled = true;
+            }
+            else
+            {
+                clearButton.IsEnabled = false;
+                saveButton.IsEnabled = false;
+            }
         }
 
         private List<RowModel> DoEverything(List<string[]> data)
@@ -147,7 +242,7 @@ namespace UserActivity
                         }
                         else
                         {
-                            result.Add(new RowModel(0, new DateTime(_year, date2.Month, date2.Day), row2[4], true, interval));
+                            result.Add(new RowModel(0, new DateTime(_year, date2.Month, date2.Day), row2[4], "TAK", interval));
                         }
 
                         ignore.Add(row);
@@ -170,7 +265,7 @@ namespace UserActivity
             {
                 foreach (string user in users)
                 {
-                    final.Add(new RowModel(lp, d, user, false, new TimeSpan(0)));
+                    final.Add(new RowModel(lp, d, user, "NIE", new TimeSpan(0)));
                     lp++;
                     //Console.WriteLine(d.ToString(), user, false, new TimeSpan(0));
                 }
@@ -182,7 +277,7 @@ namespace UserActivity
                 matchPerson = result.Where(x => x.date == row.date && x.login == row.login).FirstOrDefault();
                 if (matchPerson != null)
                 {
-                    row.wasLoggedThatDay = true;
+                    row.wasLoggedThatDay = "TAK";
                     row.activityTime = matchPerson.activityTime;
                 }
             }
